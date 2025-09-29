@@ -1,1 +1,25 @@
+ADR-001: Elecció de base de dades
 
+Context
+El projecte necessita gestionar informació sobre:
+
+Productes: botes amb característiques com talla, marca, preu i stock.
+
+Usuaris: clients amb dades de contacte i amb les dades personals.
+
+Comandes: relacionades amb usuaris i productes.
+
+Volem que sigui escalable, fàcil de desplegar i flexible davant canvis futurs.
+
+Decisió
+Utilitzaré  MongoDB com a base de dades principal, i el gestionaré amb Docker.
+
+Conseqüències
+
+Escalable i flexible.
+
+Integració senzilla amb Node.js.
+
+Consultes relacionals més complexes.
+
+Necessitat de modelar bé els documents per evitar duplicació de dades.
