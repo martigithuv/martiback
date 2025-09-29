@@ -1,0 +1,19 @@
+Context
+S'ha de decidir com organitzar el codi del projecte, incloent backend i frontend. La decisió afecta: gestió de dependències, desplegaments, col·laboració entre equips i manteniment a llarg termini. Una estructura que faciliti el desenvolupament i la visibilitat del projecte sense complicar excessivament la part de gestió.
+
+Decisió
+S’adopta l’enfocament monorepo, on tot el codi del projecte (backend i frontend) resideix en un únic repositori.
+
+Conseqüències
+
+Millor coordinació entre backend i frontend: canvis relacionats es poden veure i provar conjuntament.
+
+Simplifica la gestió de versions i dependències compartides.
+
+Facilita la visibilitat global del projecte per part de l’equip i nous col·laboradors.
+
+Pot dificultar la gestió de permisos i desplegaments independents de cada part del projecte.
+
+El repositori pot créixer ràpidament, fent que les descàrregues i clonacions siguin més lentes si no es gestiona correctament.
+
+Requereix disciplina en l’organització de carpetes i scripts de build per evitar conflictes i redundàncies.
