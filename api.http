@@ -1,0 +1,71 @@
+### Obtenir totes les botes que hi ha a la base de dades
+GET http://localhost:3000/api/products HTTP/1.1
+content-type: application/json
+
+### Crear una nova bota
+POST http://localhost:3000/api/products HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Nike Mercurial Superfly 9",
+  "description": "Bota de fútbol ligera con tecnología Flyknit y suela para césped natural",
+  "price": 189.99,
+  "category": "roba",
+  "stock": 25,
+  "active": true
+}
+
+### Crear bota Nike Phantom
+POST http://localhost:3000/api/products HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Nike Phantom",
+  "description": "Bota de fútbol control y precisión, suela ligera para césped natural y artificial",
+  "price": 120.99,
+  "category": "roba",
+  "stock": 15,
+  "active": true
+}
+
+### Crear bota Adidas Predator
+POST http://localhost:3000/api/products HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Adidas Predator",
+  "description": "Bota de fútbol con tecnología Controlskin para mayor agarre y precisión",
+  "price": 110.50,
+  "category": "roba",
+  "stock": 20,
+  "active": true
+}
+
+### Crear bota Puma Future
+POST http://localhost:3000/api/products HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Puma Future",
+  "description": "Bota flexible con sistema NETFIT para ajuste personalizado y ligereza",
+  "price": 105.75,
+  "category": "roba",
+  "stock": 10,
+  "active": true
+}
+
+### Actualizar una bota de fútbol existent
+PUT http://localhost:3000/api/products/672f2a0c9a12b4e3d3b8f1a5 HTTP/1.1
+content-type: application/json
+
+{
+  "name": "Nike Mercurial Superfly 9 Elite",
+  "description": "Versión mejorada con placa de fibra de carbono y ajuste más preciso",
+  "price": 219.99,
+  "category": "roba",
+  "stock": 15,
+  "active": true
+}
+
+### Eliminar una bota
+DELETE http://localhost:3000/api/products/672f2a0c9a12b4e3d3b8f1a5 HTTP/1.1
