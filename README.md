@@ -2,6 +2,7 @@
 backend
 IMPACT PRO
 
+<<<<<<< HEAD
 Impact Pro és una plataforma web dedicada a la venda de botes de futbol de diferents marques i models. L’objectiu és oferir una experiència senzilla, intuïtiva i ràpida perquè els usuaris 
 puguin trobar i comprar les seves botes ideals, amb informació detallada i un procés de compra segur.
 
@@ -26,3 +27,6 @@ Facilita l’ús de frameworks per accelerar el desenvolupament.
 
 4. Docker
 Garanteix que es pugui desenvolupar, provar i desplegar fàcilment, sense dependre del sistema on s’executa.
+=======
+Desenvolupament d'aplicacions amb Frameworks client/servidor
+>>>>>>> dd341f0 (cambios)
