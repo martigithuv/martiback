@@ -1,91 +1,99 @@
-// controllers/userController.js
-const User = require('../models/user'); // ajusta la ruta segons el model
-const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken'); // Descomenta si usas JWT
+const userService = require('../services/userService');
 
-// Crea un nou usuari
-exports.createUserHandler = async (req, res) => {
+//      REGISTER
+exports.register = async (req, res) => {
     try {
-        const { name, email, password } = req.body;
-        const existingUser = await User.findOne({ email });
-        if (existingUser) return res.status(400).json({ message: 'Usuari ja existeix' });
-
-        // NOTA: Assegura't que el HASHING es faci en el model User (amb middleware pre('save')).
-        const user = new User({ name, email, password });
-        await user.save();
-
-        res.status(201).json({ message: 'Usuari creat', user: { name: user.name, email: user.email } });
+        const result = await userService.registerUser(req.body);
+        res.status(201).json(result);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(400).json({ message: err.message });
     }
 };
 
-// Funció per a l'inici de sessió (Login)
-exports.loginUserHandler = async (req, res) => {
+//        LOGIN
+exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
+        const { accessToken, refreshToken } = await userService.loginUsuario({ email, password });
 
-        // 1. Buscar l'usuari per email. Usem .select('+password') si té 'select: false' al model
-        const user = await User.findOne({ email }).select('+password');
+        res.json({ accessToken, refreshToken });
+    } catch (err) {
+        res.status(401).json({ message: err.message });
+    }
+};
 
-        if (!user) {
-            return res.status(400).json({ message: 'Credencials no vàlides' });
+//   REFRESH ACCESS TOKEN
+exports.refreshToken = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            return res.status(400).json({ message: "Falta el refreshToken" });
         }
 
-        // 2. Comparar la contrasenya
-        // NOTA: El login només funcionarà si la contrasenya es va guardar hasheada.
-        const isMatch = await bcrypt.compare(password, user.password);
+        const tokens = await userService.refrescarAccessToken(refreshToken);
+        res.json(tokens);
+    } catch (err) {
+        res.status(401).json({ message: err.message });
+    }
+};
 
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Credencials no vàlides' });
+//            LOGOUT
+exports.logout = async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            return res.status(400).json({ message: "Falta el refreshToken" });
         }
 
-        // 3. Resposta d'èxit (sense JWT)
-        res.json({ message: 'Inici de sessió correcte', user: { name: user.name, email: user.email } });
-
+        await userService.logoutUsuario(refreshToken);
+        res.json({ message: "Sessió tancada correctament" });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
 
-// Obté tots els usuaris (sense contrasenya)
-exports.getAllUsersHandler = async (req, res) => {
+//       GET ALL USERS
+exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().select('-password');
+        const users = await userService.getAllUsers();
         res.json(users);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
 
-// Obté usuari per ID
-exports.getUserByIdHandler = async (req, res) => {
+//        GET USER BY ID
+exports.getUserById = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('-password');
-        if (!user) return res.status(404).json({ message: 'Usuari no trobat' });
+        const user = await userService.getUserById(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({ message: "Usuari no trobat" });
+        }
+
         res.json(user);
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
 };
 
-// Actualitza usuari per ID
-exports.updateUserHandler = async (req, res) => {
+//         UPDATE USER
+exports.updateUser = async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true }).select('-password');
-        if (!user) return res.status(404).json({ message: 'Usuari no trobat' });
-        res.json({ message: 'Usuari actualitzat', user });
+        const updatedUser = await userService.updateUser(req.params.id, req.body);
+        res.json({ message: "Usuari actualitzat", user: updatedUser });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(400).json({ message: err.message });
     }
 };
 
-// Elimina usuari per ID
-exports.deleteUserHandler = async (req, res) => {
+//         DELETE USER
+exports.deleteUser = async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(req.params.id);
-        if (!user) return res.status(404).json({ message: 'Usuari no trobat' });
-        res.json({ message: 'Usuari eliminat' });
+        await userService.deleteUser(req.params.id);
+        res.json({ message: "Usuari eliminat" });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

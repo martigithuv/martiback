@@ -1,49 +1,67 @@
-// routes/userRoutes.js
 const express = require('express');
 const router = express.Router();
 
-//Importamos los controladores
+// Importamos los controladores
 const userController = require('../controllers/userController');
 
-//RUTA DE AUTENTICACIÓN Y REGISTRO
+/**
+ * =======================
+ * AUTH (Sesión 8)
+ * =======================
+ */
 
 /**
  * @route POST /api/user/register
- * @desc Registra un nuevo usuario en el sistema.
+ * @desc Registra un nuevo usuario con contraseña hasheada
  */
-router.post('/register', userController.createUserHandler);
+router.post('/register', userController.register);
 
 /**
  * @route POST /api/user/login
- * @desc Inicia sesión para un usuario, devolviendo un token. <--- ¡Ruta Añadida!
+ * @desc Inicia sesión, genera Access Token y Refresh Token
  */
-router.post('/login', userController.loginUserHandler); // <-- Debes definir 'loginUserHandler' en tu controlador
+router.post('/login', userController.login);
 
-//RUTES CRUD BASE /api/user (Rutas base para manejo de usuarios)
+/**
+ * @route POST /api/user/refresh
+ * @desc Genera nuevos tokens usando un Refresh Token válido (rotación)
+ */
+router.post('/refresh', userController.refreshToken);
+
+/**
+ * @route POST /api/user/logout
+ * @desc Invalida / elimina el Refresh Token (logout real)
+ */
+router.post('/logout', userController.logout);
+
+/**
+ * =======================
+ * CRUD USERS
+ * =======================
+ */
 
 /**
  * @route GET /api/user
- * @desc Obtiene todos los usuarios (sin datos sensibles).
+ * @desc Obtiene todos los usuarios (sin contraseña)
  */
-router.get('/', userController.getAllUsersHandler);
+router.get('/', userController.getAllUsers);
 
 /**
  * @route GET /api/user/:id
- * @desc Obtiene un usuario específico por su ID.
+ * @desc Obtiene un usuario específico (sin contraseña)
  */
-router.get('/:id', userController.getUserByIdHandler);
+router.get('/:id', userController.getUserById);
 
 /**
  * @route PUT /api/user/:id
- * @desc Actualiza la información de un usuario por ID.
+ * @desc Actualiza un usuario (si cambia password, se re-hashea automáticamente)
  */
-router.put('/:id', userController.updateUserHandler);
+router.put('/:id', userController.updateUser);
 
 /**
  * @route DELETE /api/user/:id
- * @desc Elimina un usuario por ID.
+ * @desc Elimina un usuario por ID
  */
-router.delete('/:id', userController.deleteUserHandler);
+router.delete('/:id', userController.deleteUser);
 
-// Exportamos el router
 module.exports = router;

@@ -1,20 +1,26 @@
-require('dotenv').config();
 const express = require('express');
-const connectDB = require('./config/db');
-const productRoutes = require('./routes/productRoutes'); // Importem les rutes
+const connectDB = require('./config/db'); 
+const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
 
 const app = express();
+
 app.use(express.json());
 
-// Connexió a MongoDB
-connectDB();
+connectDB()
+  .then(() => console.log("MongoDB connectat correctament"))
+  .catch((err) => console.error("Error connectant a MongoDB:", err));
 
-app.get('/', (req, res) => res.send('API Ecommerce en marxa'));
+// Ruta principal
+app.get('/', (req, res) => {
+  res.send('API Ecommerce + Sessió 8 JWT/Refresh activa i funcionant');
+});
 
-// Muntem les rutes de productes sota el prefix '/api/products'
 app.use('/api/products', productRoutes);
+
 app.use('/api/user', userRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor escoltant al port ${PORT}`));
+
+module.exports = app;

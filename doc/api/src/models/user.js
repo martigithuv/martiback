@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     match: [/^\S+@\S+\.\S+$/, 'El format del correu no és vàlid']
   },
-  password: {
+  password: { // <-- Quita select: false
     type: String,
     required: [true, 'La contrasenya és obligatòria'],
     minlength: [6, 'La contrasenya ha de tenir almenys 6 caràcters']
@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     enum: ['client', 'admin'],
     default: 'client'
   },
+  refreshTokens: [String],
   createdAt: {
     type: Date,
     default: Date.now
@@ -33,9 +34,9 @@ const userSchema = new mongoose.Schema({
 // Índex per millorar rendiment en consultes per email
 userSchema.index({ email: 1 });
 
-//Hash automàtic abans de guardar l'usuari
+// Hash automàtic abans de guardar l'usuari
 userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next(); // Només si es modifica la contrasenya
+  if (!this.isModified('password')) return next();
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -45,9 +46,17 @@ userSchema.pre('save', async function (next) {
   }
 });
 
-//comparar contrasenyes
+// Comparar contrasenyes
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Opcional: Exclou la contrasenya en les respostes HTTP (JSON)
+userSchema.set('toJSON', {
+  transform: function(doc, ret, options) {
+    delete ret.password; // <-- Això exclou la contrasenya només quan es converteix a JSON
+    return ret;
+  }
+});
 
 module.exports = mongoose.model('User', userSchema);

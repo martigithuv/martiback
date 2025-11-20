@@ -1,34 +1,34 @@
 // services/userService.js
-const User = require('../models/userModel');
-const bcrypt = require('bcrypt');
+const User = require('../models/user');
+const bcrypt = require('bcryptjs'); // bcryptjs es más estable en Windows
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+
+// 👇 Agrega estos logs para verificar las variables en este archivo
+console.log('🔍 ACCESS_TOKEN_SECRET en userService:', process.env.ACCESS_TOKEN_SECRET ? '✅ Definido' : '❌ No definido');
+console.log('🔍 REFRESH_TOKEN_SECRET en userService:', process.env.REFRESH_TOKEN_SECRET ? '✅ Definido' : '❌ No definido');
 
 const saltRounds = 10;
 
 /**
- * Crea un nou usuari (amb contrasenya hashejada)
- * @param {object} userData - Dades del nou usuari.
- * @returns {Promise<User>} L'usuari creat.
+ * Crea un nuevo usuario (con contraseña hasheada)
  */
 const createUser = async (userData) => {
-    // Si ve una contrasenya, la xifrem
-    if (userData.password) {
-        userData.password = await bcrypt.hash(userData.password, saltRounds);
-    }
+    if (!userData.password) throw new Error('Falta la contraseña');
+    const hashedPassword = await bcrypt.hash(userData.password, saltRounds);
+    userData.password = hashedPassword;
 
     const newUser = new User(userData);
     return await newUser.save();
 };
 
 /**
- * Registre d’usuari per a l’autenticació (registre oficial amb validacions)
+ * Registro de usuario (validación y guardado)
  */
 const registerUser = async ({ name, email, password, role }) => {
+    if (!name || !email || !password) throw new Error('Falta algún dato obligatorio');
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-        throw new Error('L\'usuari ja existeix');
-    }
+    if (existingUser) throw new Error('El usuario ya existe');
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const user = new User({ name, email, password: hashedPassword, role });
@@ -37,56 +37,126 @@ const registerUser = async ({ name, email, password, role }) => {
     return { id: user._id, name: user.name, email: user.email };
 };
 
-/**
- * Login d’usuari amb verificació i token JWT
- */
-const loginUser = async ({ email, password }) => {
-    const user = await User.findOne({ email });
-    if (!user) throw new Error('Usuari no trobat');
+// =======================
+// Sessió 8: JWT
+// =======================
 
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) throw new Error('Contrasenya incorrecta');
+const generarAccessToken = (usuario) => {
+    if (!usuario) throw new Error('Usuario inválido');
+    if (!process.env.ACCESS_TOKEN_SECRET) {
+        console.error('❌ ERROR: ACCESS_TOKEN_SECRET no está definido en generarAccessToken');
+        console.error('🔍 process.env.ACCESS_TOKEN_SECRET:', process.env.ACCESS_TOKEN_SECRET);
+        throw new Error('ACCESS_TOKEN_SECRET no está definido');
+    }
 
-    // Generem token JWT
-    const token = jwt.sign(
-        { id: user._id, email: user.email, role: user.role },
-        process.env.JWT_SECRET,
-        { expiresIn: '2h' }
-    );
+    const payload = { id: usuario._id, email: usuario.email };
+    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRY
+    });
+};
 
-    return { message: 'Login correcte', token };
+const generarRefreshToken = (usuario) => {
+    if (!usuario) throw new Error('Usuario inválido');
+    if (!process.env.REFRESH_TOKEN_SECRET) {
+        console.error('❌ ERROR: REFRESH_TOKEN_SECRET no está definido en generarRefreshToken');
+        console.error('🔍 process.env.REFRESH_TOKEN_SECRET:', process.env.REFRESH_TOKEN_SECRET);
+        throw new Error('REFRESH_TOKEN_SECRET no está definido');
+    }
+
+    const payload = { id: usuario._id };
+    return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRY
+    });
 };
 
 /**
- * Obté tots els usuaris (sense mostrar la contrasenya)
+ * Login usuario con validación y generación de tokens
  */
+const loginUsuario = async ({ email, password }) => {
+    if (!email || !password) throw new Error('Faltan credenciales');
+    
+    console.log('🔍 Buscando usuario con email:', email); // 👈 Log 1
+    
+    const user = await User.findOne({ email }).select('+password');
+    
+    console.log('👤 Usuario encontrado:', user ? user.email : 'No encontrado'); // 👈 Log 2
+    if (!user) throw new Error('Usuario o contraseña incorrectos');
+
+    console.log('🔒 Contraseña hasheada en DB:', user.password); // 👈 Log 3
+    console.log('🔑 Contraseña enviada:', password); // 👈 Log 4
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    console.log('✅ Validación de contraseña:', validPassword); // 👈 Log 5
+
+    if (!validPassword) throw new Error('Usuario o contraseña incorrectos');
+
+    console.log('🔐 Generando ACCESS_TOKEN...'); // 👈 Log 6
+    const accessToken = generarAccessToken(user);
+    console.log('🔐 Generando REFRESH_TOKEN...'); // 👈 Log 7
+    const refreshToken = generarRefreshToken(user);
+
+    user.refreshTokens.push(refreshToken);
+    await user.save();
+
+    return { accessToken, refreshToken };
+};
+
+/**
+ * Refresca Access Token usando Refresh Token válido
+ */
+const refrescarAccessToken = async (refreshToken) => {
+    if (!refreshToken) throw new Error('Falta el refreshToken');
+
+    let decoded;
+    try {
+        decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    } catch (err) {
+        throw new Error('Token de refresco inválido o caducado');
+    }
+
+    const user = await User.findOne({ _id: decoded.id, refreshTokens: refreshToken });
+    if (!user) throw new Error('Acceso denegado. Token no válido o revocado');
+
+    const nuevoRefreshToken = generarRefreshToken(user);
+    user.refreshTokens = user.refreshTokens.filter(t => t !== refreshToken);
+    user.refreshTokens.push(nuevoRefreshToken);
+    await user.save();
+
+    const nuevoAccessToken = generarAccessToken(user);
+    return { accessToken: nuevoAccessToken, refreshToken: nuevoRefreshToken };
+};
+
+/**
+ * Logout usuario: invalida Refresh Token
+ */
+const logoutUsuario = async (refreshToken) => {
+    if (!refreshToken) throw new Error('Falta el refreshToken');
+    await User.updateOne(
+        { refreshTokens: refreshToken },
+        { $pull: { refreshTokens: refreshToken } }
+    );
+};
+
+// =======================
+// CRUD Users
+// =======================
+
 const getAllUsers = async () => {
     return await User.find().select('-password');
 };
 
-/**
- * Obté un usuari per ID (sense contrasenya)
- */
 const getUserById = async (userId) => {
     return await User.findById(userId).select('-password');
 };
 
-/**
- * Actualitza un usuari per ID
- */
 const updateUser = async (userId, updateData) => {
-    // Si es modifica la contrasenya, també la tornem a hashejar
     if (updateData.password) {
         updateData.password = await bcrypt.hash(updateData.password, saltRounds);
     }
-
     return await User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true })
         .select('-password');
 };
 
-/**
- * Elimina un usuari per ID
- */
 const deleteUser = async (userId) => {
     return await User.findByIdAndDelete(userId);
 };
@@ -94,7 +164,11 @@ const deleteUser = async (userId) => {
 module.exports = {
     createUser,
     registerUser,
-    loginUser,
+    loginUsuario,
+    refrescarAccessToken,
+    logoutUsuario,
+    generarAccessToken,
+    generarRefreshToken,
     getAllUsers,
     getUserById,
     updateUser,
