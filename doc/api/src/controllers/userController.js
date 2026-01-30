@@ -14,9 +14,14 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        const { accessToken, refreshToken } = await userService.loginUsuario({ email, password });
+        const { accessToken, refreshToken, userId } = await userService.loginUsuario({ email, password });
 
-        res.json({ accessToken, refreshToken });
+        // Devolver también el userId
+        res.json({ 
+            accessToken, 
+            refreshToken,
+            userId  // ← AÑADIDO
+        });
     } catch (err) {
         res.status(401).json({ message: err.message });
     }

@@ -11,11 +11,27 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "mongoose": "^8.19.0"
+    "express": "^5.2.1",
+    "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongodb": "^7.0.0",
+    "mongoose": "^8.21.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
-  }
+  },
+  "directories": {
+    "doc": "doc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martigithuv/martiback.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/martigithuv/martiback/issues"
+  },
+  "homepage": "https://github.com/martigithuv/martiback#readme"
 }
