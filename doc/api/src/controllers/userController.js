@@ -1,4 +1,5 @@
 const userService = require('../services/userService');
+const User = require('../models/user');
 
 //      REGISTER
 exports.register = async (req, res) => {
@@ -101,5 +102,38 @@ exports.deleteUser = async (req, res) => {
         res.json({ message: "Usuari eliminat" });
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+};
+
+//         UPDATE ROLE
+exports.updateUserRole = async (req, res) => {
+    const allowedRoles = ['client', 'admin'];
+    const { role } = req.body;
+    if (!allowedRoles.includes(role)) {
+        return res.status(400).json({ message: 'Rol inválido' });
+    }
+
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { role },
+            { new: true, runValidators: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ message: 'Usuari no trobat' });
+        }
+
+        res.json({
+            message: 'Rol actualizado',
+            user: {
+                id: user._id.toString(),
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
 };

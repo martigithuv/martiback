@@ -3,6 +3,8 @@ const router = express.Router();
 
 // Importamos los controladores
 const userController = require('../controllers/userController');
+const authMiddleware = require('../middleware/authMiddleware');
+const roleMiddleware = require('../middleware/roleMiddleware');
 
 /**
  * =======================
@@ -57,6 +59,12 @@ router.get('/:id', userController.getUserById);
  * @desc Actualiza un usuario (si cambia password, se re-hashea automáticamente)
  */
 router.put('/:id', userController.updateUser);
+router.patch(
+  '/:id/role',
+  authMiddleware,
+  roleMiddleware('admin'),
+  userController.updateUserRole
+);
 
 /**
  * @route DELETE /api/user/:id
