@@ -1,5 +1,5 @@
 // services/categoryService.js
-const Category = require('../models/category');
+const Category = require('../models/categoria');
 
 /**
  * Función para crear una nueva categoría.

@@ -1,5 +1,5 @@
 // controllers/categoryController.js
-const categoryService = require('../services/categoryService');
+const categoryService = require('../services/categoriaService');
 
 /**
  * Crea una nueva categoría. (POST /api/categories)

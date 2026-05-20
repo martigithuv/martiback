@@ -2,9 +2,9 @@
   "name": "api",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "dev": "nodemon --config nodemon.json",
+    "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "hash-passwords": "node src/scripts/hashLegacyPasswords.js"
   },
@@ -19,7 +19,13 @@
     "express-session": "^1.18.2",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^8.21.0"
+    "mongoose": "^8.21.0",
+    "pino": "^8.16.2",
+    "pino-http": "^8.5.0",
+    "pino-pretty": "^10.3.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

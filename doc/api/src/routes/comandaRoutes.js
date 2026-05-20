@@ -20,4 +20,8 @@ router.put('/:id', comandaController.updateComandaHandler);
 // DELETE /api/comandes/:id -> Elimina una comanda
 router.delete('/:id', comandaController.deleteComandaHandler);
 
+// Rutas de Checkout
+router.post('/checkout/create-session', comandaController.createCheckoutSession);
+router.post('/checkout/webhook', express.raw({ type: 'application/json' }), comandaController.stripeWebhook);
+
 module.exports = router;

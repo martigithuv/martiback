@@ -35,7 +35,7 @@ const comandaSchema = new mongoose.Schema({
   // Nombre del campo 'status' ajustado a 'estat' para coincidir con el DER
   estat: {
     type: String,
-    enum: ['pendent', 'en procés', 'enviat', 'completat', 'cancel·lat'],
+    enum: ['pendent', 'pagat', 'en procés', 'enviat', 'completat', 'cancel·lat'],
     default: 'pendent'
   },
   // Campo 'data' implícito con timestamps o explícito como hiciste:

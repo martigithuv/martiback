@@ -1,6 +1,6 @@
 // routes/categoryRoutes.js
 const express = require('express');
-const categoryController = require('../controllers/categoryController');
+const categoryController = require('../controllers/categoriaController');
 const router = express.Router();
 
 // Rutas base: /api/categories

@@ -1,6 +1,6 @@
 // src/routes/cistellaRoutes.js
-import express from 'express';
-import { getCistella, afegirProducte, eliminarProducte, buidarCistella, actualitzarQuantitat } from '../controllers/cistellaController.js';
+const express = require('express');
+const { getCistella, afegirProducte, eliminarProducte, buidarCistella, actualitzarQuantitat } = require('../controllers/cistellaController.js');
 
 const router = express.Router();
 
@@ -10,4 +10,4 @@ router.delete('/eliminar/:itemId', eliminarProducte);
 router.delete('/buidar/:userId', buidarCistella);
 router.put('/actualitzar', actualitzarQuantitat);
 
-export default router;
+module.exports = router;

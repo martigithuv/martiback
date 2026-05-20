@@ -34,6 +34,14 @@ const productSchema = new mongoose.Schema({
   active: {
     type: Boolean,
     default: true
+  },
+  image: {
+    type: String,
+    default: './public/botas3.png'
+  },
+  brand: {
+    type: String,
+    default: 'Generic'
   }
 }, { timestamps: true });
 
